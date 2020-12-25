@@ -271,7 +271,9 @@ class WadizCrawler:
             #dtStr = now.strftime("%Y-%m-%d %H:%M:%S")
 
             category, title, achieve, funding, supporter, likes, goal, period, remaining, stdate, endate = self.extractCol(tree, category, title, achieve, funding, supporter, likes, goal, period, remaining)
-            minimumOption = re.sub('[^a-zA-Z0-9]','',minimumOption[0]).strip()
+            minimumOption = ''.join(minimumOption)
+
+            minimumOption = re.sub('^[0-9]','',minimumOption).strip()
             minimumOption = self.cleansing(minimumOption)
             #print('minimumOption: ',end='')
             #print(minimumOption)
