@@ -159,7 +159,7 @@ class TumblbugCrawler:
             text = re.sub(u'[\U0001F300-\U0001F5FF]', '', text)  # symbols & pictographs
             text = re.sub(u'[\U0001F680-\U0001F6FF]', '', text)  # transport & map symbols
             text = re.sub(u'[\U0001F1E0-\U0001F1FF]', '', text)  # flags (iOS)
-            text = re.sub('[^0-9]','',text)
+
         except Exception as e:
             print('cleanser error')
             text = 'None'
@@ -187,9 +187,12 @@ class TumblbugCrawler:
         except:
             print("no")
             return
-
-        investment = self.driver.find_element_by_xpath('//*[@id="react-view"]/div[5]/div[1]/div/div[2]/div/div[2]/div/div[3]/div/div/div[2]/div/div/div[1]').text
+        try:
+            investment = self.driver.find_element_by_xpath('//*[@id="react-view"]/div[5]/div[1]/div/div[2]/div/div[2]/div/div[3]/div/div/div[2]/div/div/div[1]').text
+        except:
+            investment = self.driver.find_element_by_xpath('//*[@id="react-view"]/div[5]/div[1]/div/div[2]/div/div[2]/div/div[3]/div/div/section[1]/div/div[2]/div/div/div[1]').text
         investment = self.cleansing(investment)
+        investment = re.sub('[^0-9]','',investment)
         for i in range(int(communityPostNum)):
             try:
                 user = self.driver.find_element_by_xpath('//*[@id="react-view"]/div[5]/div[1]/div/div[1]/div/div/div/div['+str(i+2)+']/div/div[1]/div/div/div[1]/div/a/div').text
