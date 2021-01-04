@@ -44,7 +44,8 @@ class TumblbugCrawler:
         #chromedriver = 'C:/Users/ljy01/Desktop/chromedriver/chromedriver_win32/chromedriver.exe'
         #driver = webdriver.Chrome(chromedriver)
         SCROLL_PAUSE_TIME = 4
-
+        IMPLICITLY_PAUSE_TIME = 120
+        w=0.1
         self.driver.get(page_url)
         time.sleep(SCROLL_PAUSE_TIME)
 
@@ -55,44 +56,58 @@ class TumblbugCrawler:
         # Get scroll height
 #        last_height = driver.execute_script("return document.body.scrollHeight")
         last_height = 0
+        count = 0
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(SCROLL_PAUSE_TIME)
+        self.driver.execute_script("window.scrollTo( document.body.scrollHeight, document.body.scrollHeight-2000);")
+        time.sleep(SCROLL_PAUSE_TIME)
+        time.sleep(200)
 
-        while True:
+        #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[1516]/div/div/div[2]/a/img
+        while count <= 200:
+            print(count)
+            b = w*count
+            count= count+1
+            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[2505]/div/div/div[2]/a/img
+
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            #print('down')
-            time.sleep(SCROLL_PAUSE_TIME)
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight-1000);")
-            #print('up')
-            time.sleep(SCROLL_PAUSE_TIME)
+            self.driver.implicitly_wait(IMPLICITLY_PAUSE_TIME)
+            time.sleep(SCROLL_PAUSE_TIME+b)
+            self.driver.execute_script("window.scrollTo( document.body.scrollHeight, document.body.scrollHeight-2000);")
+            self.driver.implicitly_wait(IMPLICITLY_PAUSE_TIME)
+            time.sleep(SCROLL_PAUSE_TIME+b)
+
             new_height = self.driver.execute_script("return document.body.scrollHeight")
+            self.driver.implicitly_wait(IMPLICITLY_PAUSE_TIME)
+            time.sleep(SCROLL_PAUSE_TIME+b)
             if new_height == last_height:
-                break
+                self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight-2000);")
+                self.driver.implicitly_wait(IMPLICITLY_PAUSE_TIME)
+                time.sleep(SCROLL_PAUSE_TIME+b)
+                self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                self.driver.implicitly_wait(IMPLICITLY_PAUSE_TIME)
+                time.sleep(SCROLL_PAUSE_TIME+b)
+
+                new_height = self.driver.execute_script("return document.body.scrollHeight")
+                self.driver.implicitly_wait(IMPLICITLY_PAUSE_TIME)
+                time.sleep(SCROLL_PAUSE_TIME+b)
+                if new_height == last_height:
+                    break
             last_height = new_height
 
+#//*[@id="react-view"]/div[3]/div[1]/div[2]/div[1]/div/div[4158]
+#//*[@id="react-view"]/div[3]/div[1]/div[2]/div[1]/div/div[6282]/div/div/div[2]/a/img
         for i in range(1, nUrl+1):
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div['+str(i)+']/div/div/div[3]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[2]/div/div/div[3]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[3]/div/div/div[3]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[4]/div/div/div[2]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[5]/div/div/div[2]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[6]/div/div/div[3]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[7]/div/div/div[2]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[8]/div/div/div[2]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[9]/div/div/div[2]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[10]/div/div/div[2]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[11]/div/div/div[2]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[12]/div/div/div[2]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[13]/div/div/div[2]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[14]/div/div/div[2]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[15]/div/div/div[2]/a
-            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[16]/div/div/div[2]/a
+            if i<200:
+                continue
             try:
                 xpath1 = '//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div['+str(i)+']/div/div/div[2]/a'
                 url = self.driver.find_element_by_xpath(xpath1)
-                url = url.get_attribute('href')
             except:
                 xpath1 = '//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div['+str(i)+']/div/div/div[3]/a'
                 url = self.driver.find_element_by_xpath(xpath1)
-                url = url.get_attribute('href')
+
+            url = url.get_attribute('href')
             sql0 = "select * from tumblbug_urllist where url=\'%s\'" % (url)
             curs.execute(sql0)
             rows = curs.fetchall()
@@ -165,6 +180,8 @@ class TumblbugCrawler:
             text = 'None'
         return text
 
+
+
     def getuserinfo(self, url, title):
         conn = self.conn
         curs = conn.cursor()
@@ -187,25 +204,59 @@ class TumblbugCrawler:
         except:
             print("no")
             return
+
+        projectHost = self.driver.find_element_by_xpath('//*[@id="react-view"]/div[3]/div/div/div[1]/div/div/a').text
+
+        SCROLL_PAUSE_TIME = 4
+        IMPLICITLY_PAUSE_TIME = 120
+        w=0.1
+        # Get scroll height
+        #        last_height = driver.execute_script("return document.body.scrollHeight")
+        last_height = 0
+        count = 0
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(SCROLL_PAUSE_TIME)
+        self.driver.execute_script("window.scrollTo( document.body.scrollHeight, document.body.scrollHeight-2000);")
+        time.sleep(SCROLL_PAUSE_TIME)
+        #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[1516]/div/div/div[2]/a/img
+        while True:
+            print(count)
+            b = w*count
+            count= count+1
+            #//*[@id="react-view"]/div[3]/div[1]/div[2]/div/div[2]/div[2505]/div/div/div[2]/a/img
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            self.driver.implicitly_wait(IMPLICITLY_PAUSE_TIME)
+            time.sleep(SCROLL_PAUSE_TIME+b)
+            self.driver.execute_script("window.scrollTo( document.body.scrollHeight, document.body.scrollHeight-2000);")
+            self.driver.implicitly_wait(IMPLICITLY_PAUSE_TIME)
+            time.sleep(SCROLL_PAUSE_TIME+b)
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+            self.driver.implicitly_wait(IMPLICITLY_PAUSE_TIME)
+            time.sleep(SCROLL_PAUSE_TIME+b)
+            if new_height == last_height:
+                break
+            last_height = new_height
+
         try:
             investment = self.driver.find_element_by_xpath('//*[@id="react-view"]/div[5]/div[1]/div/div[2]/div/div[2]/div/div[3]/div/div/div[2]/div/div/div[1]').text
         except:
             investment = self.driver.find_element_by_xpath('//*[@id="react-view"]/div[5]/div[1]/div/div[2]/div/div[2]/div/div[3]/div/div/section[1]/div/div[2]/div/div/div[1]').text
         investment = self.cleansing(investment)
         investment = re.sub('[^0-9]','',investment)
-        for i in range(int(communityPostNum)):
+        for i in range(1, int(communityPostNum)):
             try:
-                user = self.driver.find_element_by_xpath('//*[@id="react-view"]/div[5]/div[1]/div/div[1]/div/div/div/div['+str(i+2)+']/div/div[1]/div/div/div[1]/div/a/div').text
+                user = self.driver.find_element_by_xpath('//*[@id="react-view"]/div[5]/div[1]/div/div[1]/div/div/div/div['+str(i)+']/div/div[1]/div/div/div[1]/div/a/div').text
+                print(user,end='')
+                print(investment)
+                if user != projectHost :
+                    sql = "insert into tumblbug_user_info(site, title, username, investment) values ('tumblbug',\'%s\',\'%s\',\'%s\')"%(title, user, investment)
+                    curs.execute(sql)
+
             except:
                 continue
 #//*[@id="react-view"]/div[5]/div[1]/div/div[1]/div/div/div/div[2]/div/div[1]/div[2]/div/div[1]/div/a/div
 #//*[@id="react-view"]/div[5]/div[1]/div/div[1]/div/div/div/div[3]/div/div[1]/div/div/div[1]/div/a/div
 #
-            print(user,end='')
-            print(investment)
-            sql = "insert into user_info(site, title, username, investment) values ('tumblbug',\'%s\',\'%s\',\'%s\')"%(title, user, investment)
-            curs.execute(sql)
-            conn.commit()
 
     def tumblbugCrawler(self):
         conn = self.conn
@@ -238,9 +289,9 @@ class TumblbugCrawler:
             brand = sub_soup.select('#react-view > div.ProjectIntroduction__ProjectIntroductionBackground-sc-1o2ojgb-0.gsZkXT > div > div > div.ProjectIntroduction__ProjectOutline-sc-1o2ojgb-2.jbdzfG > div > div > a')
             Category = sub_soup.select('#react-view > div.ProjectIntroduction__ProjectIntroductionBackground-sc-1o2ojgb-0.gsZkXT > div > div > div.ProjectIntroduction__ProjectOutline-sc-1o2ojgb-2.jbdzfG > div > a > span')
             collection = sub_soup.find('div',attrs={'class': 'ProjectIntroduction__StatusValue-sc-1o2ojgb-16 lgJcVA'})
-            supporter = sub_soup.select('#react-view > div.ProjectIntroduction__ProjectIntroductionBackground-sc-1o2ojgb-0.gsZkXT > div > div > aside > div.ProjectIntroduction__FundingStatus-sc-1o2ojgb-13.jqTlEc > div:nth-child(3) > div.ProjectIntroduction__StatusValue-sc-1o2ojgb-16.lgJcVA')
-            remain_day = sub_soup.select('#react-view > div.ProjectIntroduction__ProjectIntroductionBackground-sc-1o2ojgb-0.gsZkXT > div > div > aside > div.ProjectIntroduction__FundingStatus-sc-1o2ojgb-13.jqTlEc > div:nth-child(2) > div.ProjectIntroduction__StatusValue-sc-1o2ojgb-16.lgJcVA')
-            percentachieved = sub_soup.select('#react-view > div.ProjectIntroduction__ProjectIntroductionBackground-sc-1o2ojgb-0.gsZkXT > div > div > aside > div.ProjectIntroduction__FundingStatus-sc-1o2ojgb-13.jqTlEc > div:nth-child(1) > div.ProjectIntroduction__StatusValue-sc-1o2ojgb-16.lgJcVA > span.ProjectIntroduction__FundingRate-sc-1o2ojgb-17.cNDicH')
+            supporter = sub_soup.select('#react-view > div.ProjectIntroduction__ProjectIntroductionBackground-sc-1o2ojgb-0.gsZkXT > div > div > aside > div.ProjectIntroduction__FundingStatus-sc-1o2ojgb-13.jqTlEc > div:nth-of-type(3) > div.ProjectIntroduction__StatusValue-sc-1o2ojgb-16.lgJcVA')
+            remain_day = sub_soup.select('#react-view > div.ProjectIntroduction__ProjectIntroductionBackground-sc-1o2ojgb-0.gsZkXT > div > div > aside > div.ProjectIntroduction__FundingStatus-sc-1o2ojgb-13.jqTlEc > div:nth-of-type(2) > div.ProjectIntroduction__StatusValue-sc-1o2ojgb-16.lgJcVA')
+            percentachieved = sub_soup.select('#react-view > div.ProjectIntroduction__ProjectIntroductionBackground-sc-1o2ojgb-0.gsZkXT > div > div > aside > div.ProjectIntroduction__FundingStatus-sc-1o2ojgb-13.jqTlEc > div:nth-of-type(1) > div.ProjectIntroduction__StatusValue-sc-1o2ojgb-16.lgJcVA > span.ProjectIntroduction__FundingRate-sc-1o2ojgb-17.cNDicH')
             goal = sub_soup.select('#react-view > div.ProjectIntroduction__ProjectIntroductionBackground-sc-1o2ojgb-0.gsZkXT > div > div > aside > div.FundingInformation-cjd67l-0.gGtZns > div > span')
             pagename = "tumblbug"
 
@@ -285,6 +336,8 @@ class TumblbugCrawler:
                 notsplit = i.text.strip()
             split1 = notsplit.split("목표 금액인")
             split2 = split1[1].split('원이')
+            if split1[1] == split2:
+                split2 = split1[1].split('원을')
             goalmoney = split2[0].replace(",","").replace(" ","")
 
             #remaining
@@ -362,16 +415,16 @@ class TumblbugCrawler:
 ##react-view > div.ProjectPage__ProjectContentsBackground-f3cisk-0.lbhpFL > div.Container-gci8y7-0.wYlFP > div > div.ProjectPage__ProjectContentsMainColumn-f3cisk-2.dypJVt > div > div > div.Community__Posts-sc-1o9947p-0.kEeUNF > div.CommunityPostSummaryCard__PostSummaryCardWrapper-sc-3xh5y6-1.cHWozv > div > div.CommunityPostSummaryCard__MetaWrapper-sc-3xh5y6-2.Jpeyp > div > div > div.CommunityPostSummaryCard__UserProfile-sc-3xh5y6-6.ljvGXI > div > a > div #후원자1.
 
 #커뮤니티8명, 암흑낭만주의
-##react-view > div.ProjectPage__ProjectContentsBackground-f3cisk-0.lbhpFL > div.Container-gci8y7-0.wYlFP > div > div.ProjectPage__ProjectContentsMainColumn-f3cisk-2.dypJVt > div > div > div.Community__Posts-sc-1o9947p-0.kEeUNF > div:nth-child(2) > div > div.CommunityPostSummaryCard__MetaWrapper-sc-3xh5y6-2.Jpeyp > div > div > div.CommunityPostSummaryCard__UserProfile-sc-3xh5y6-6.ljvGXI > div > a > div #후원자1.
-##react-view > div.ProjectPage__ProjectContentsBackground-f3cisk-0.lbhpFL > div.Container-gci8y7-0.wYlFP > div > div.ProjectPage__ProjectContentsMainColumn-f3cisk-2.dypJVt > div > div > div.Community__Posts-sc-1o9947p-0.kEeUNF > div:nth-child(3) > div > div.CommunityPostSummaryCard__MetaWrapper-sc-3xh5y6-2.Jpeyp > div.CommunityPostSummaryCard__Meta-sc-3xh5y6-4.ebxTKa > div > div.CommunityPostSummaryCard__UserProfile-sc-3xh5y6-6.ljvGXI > div > a > div #창작자.
-##react-view > div.ProjectPage__ProjectContentsBackground-f3cisk-0.lbhpFL > div.Container-gci8y7-0.wYlFP > div > div.ProjectPage__ProjectContentsMainColumn-f3cisk-2.dypJVt > div > div > div.Community__Posts-sc-1o9947p-0.kEeUNF > div:nth-child(4) > div > div.CommunityPostSummaryCard__MetaWrapper-sc-3xh5y6-2.Jpeyp > div > div > div.CommunityPostSummaryCard__UserProfile-sc-3xh5y6-6.ljvGXI > div > a > div #후원자2.
+##react-view > div.ProjectPage__ProjectContentsBackground-f3cisk-0.lbhpFL > div.Container-gci8y7-0.wYlFP > div > div.ProjectPage__ProjectContentsMainColumn-f3cisk-2.dypJVt > div > div > div.Community__Posts-sc-1o9947p-0.kEeUNF > div:nth-of-type(2) > div > div.CommunityPostSummaryCard__MetaWrapper-sc-3xh5y6-2.Jpeyp > div > div > div.CommunityPostSummaryCard__UserProfile-sc-3xh5y6-6.ljvGXI > div > a > div #후원자1.
+##react-view > div.ProjectPage__ProjectContentsBackground-f3cisk-0.lbhpFL > div.Container-gci8y7-0.wYlFP > div > div.ProjectPage__ProjectContentsMainColumn-f3cisk-2.dypJVt > div > div > div.Community__Posts-sc-1o9947p-0.kEeUNF > div:nth-of-type(3) > div > div.CommunityPostSummaryCard__MetaWrapper-sc-3xh5y6-2.Jpeyp > div.CommunityPostSummaryCard__Meta-sc-3xh5y6-4.ebxTKa > div > div.CommunityPostSummaryCard__UserProfile-sc-3xh5y6-6.ljvGXI > div > a > div #창작자.
+##react-view > div.ProjectPage__ProjectContentsBackground-f3cisk-0.lbhpFL > div.Container-gci8y7-0.wYlFP > div > div.ProjectPage__ProjectContentsMainColumn-f3cisk-2.dypJVt > div > div > div.Community__Posts-sc-1o9947p-0.kEeUNF > div:nth-of-type(4) > div > div.CommunityPostSummaryCard__MetaWrapper-sc-3xh5y6-2.Jpeyp > div > div > div.CommunityPostSummaryCard__UserProfile-sc-3xh5y6-6.ljvGXI > div > a > div #후원자2.
 
 
 
 if __name__ == '__main__':
 
-    page_url = 'https://tumblbug.com/discover?ongoing=onGoing&sort=endedAt'
-    nUrl = 100
+    page_url = 'https://tumblbug.com/discover?achieveRate=1&currentMoney=1&sort=publishedAt'
+    nUrl = 300
     wc = TumblbugCrawler()
     #wc.getUrlLister(page_url, nUrl)
     wc.tumblbugCrawler()
