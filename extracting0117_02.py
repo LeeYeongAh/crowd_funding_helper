@@ -20,19 +20,16 @@ model1 = word2vec.Word2Vec.load('embedding/mix_addata_0117_03.model')
 #print(model.most_similar(positive=["학교"]))
 #print(model.most_similar(positive=["구두"]))
 
-word1 = '커피'
-word2 = '음료'
-list1 = model.most_similar(negative=[word1])
+word1 = '캘린더'
+word2 = '달력'
+#list1 = model.most_similar(negative=[word1])
 list1 = model.most_similar(positive=[word1], topn=10)
-print("<<<", word1, ">>>\n", list1)
+print("<<<", word1, ">>> size=200 \n", list1)
+list1 = model1.most_similar(positive=[word1], topn=10)
+print("<<<", word1, ">>> size=500\n", list1)
 
 list2 = model.most_similar(positive=[word2])
-print("<<<", word2, ">>>\n", list2)
+print("<<<", word2, ">>> size=200 \n", list2)
 
-
-list1 = model1.most_similar(negative=[word1])
-list1 = model1.most_similar(positive=[word1], topn=10)
-print("<<<", word1, ">>>\n", list1)
-
-list2 = model1.most_similar(positive=[word2])
-print("<<<", word2, ">>>\n", list2)
+list2 = model1.most_similar(positive=[word2], topn=10)
+print("<<<", word2, ">>> size=500\n", list2)
